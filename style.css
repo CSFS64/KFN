@@ -1,0 +1,224 @@
+:root{
+  --bg:#e6e6e6;
+  --panel:#ededed;
+  --line:#c8c8c8;
+  --text:#000;
+  --muted:#444;
+  --link:#00c;
+  --visited:#551a8b;
+  --paper:#fff;
+}
+
+html,body{height:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font:16px/1.55 Arial, Helvetica, sans-serif;
+  overflow-x:hidden;
+}
+
+a{ color:var(--link); text-decoration:underline; }
+a:visited{ color:var(--visited); }
+
+.top{
+  padding:10px 12px;
+  background: linear-gradient(#f2f2f2, #dcdcdc);
+  border-bottom:1px solid var(--line);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
+}
+.brand{
+  font-size:20px;
+  font-weight:bold;
+  letter-spacing:0.2px;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.9);
+}
+.hint{ margin-top:4px; color:var(--muted); font-size:13px; }
+
+.page{ max-width:1200px; margin:12px auto; padding:0 10px; }
+.wrap{ display:table; width:100%; border-collapse:collapse; }
+
+.left{
+  display:table-cell;
+  width:290px;
+  vertical-align:top;
+  padding:10px 10px 10px 0;
+}
+.leftInner{
+  background: linear-gradient(#f2f2f2, #dcdcdc);
+  border:1px solid var(--line);
+  padding:12px 12px;
+  border-radius:16px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    0 2px 10px rgba(0,0,0,0.08);
+}
+
+.right{ display:table-cell; vertical-align:top; padding:10px 0 10px 10px; }
+
+.boxTitle{ font-size:13px; font-weight:bold; margin:0 0 8px; padding:2px 0; }
+.small{ font-size:13px; color:var(--muted); }
+
+hr{ border:0; border-top:1px solid var(--line); margin:12px 0; }
+ul{ margin:6px 0 0 18px; padding:0; }
+li{ margin:6px 0; }
+
+.btn{
+  display:inline-block;
+  font-size:13px;
+  padding:5px 10px;
+  color:#111;
+  border:1px solid #7f7f7f;
+  border-radius:12px;
+  background: linear-gradient(#ffffff, #d2d2d2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.95), 0 1px 0 rgba(0,0,0,0.08);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+  cursor:pointer;
+  user-select:none;
+}
+.btn:hover{ background: linear-gradient(#ffffff, #c9c9c9); border-color:#6f6f6f; }
+.btn:active{ background: linear-gradient(#c9c9c9, #f2f2f2); box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
+
+.btnRow{ display:flex; flex-wrap:wrap; gap:8px; }
+.toolbar{ display:flex; flex-direction:column; gap:10px; }
+
+.searchRow{ display:flex; gap:6px; align-items:center; }
+.searchRow input{
+  flex:1 1 auto;
+  font-size:13px;
+  padding:6px 8px;
+  border:1px solid #9a9a9a;
+  border-radius:10px;
+  background:#fff;
+  outline:none;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.08);
+}
+.searchRow input:focus{ border-color:#666; }
+
+.searchMeta{ font-size:12px; color:#555; line-height:1.3; }
+
+.lang-zh [data-lang="en"]{ display:none; }
+.lang-en [data-lang="zh"]{ display:none; }
+
+.scrollPane{
+  height: calc(100vh - 84px);
+  overflow:auto;
+  background:transparent;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding:0 10px;
+}
+
+.doc{
+  box-sizing:border-box;
+  background:var(--paper);
+  width:8.5in;
+  max-width:100%;
+  padding:1in;
+  border:1px solid #d6d6d6;
+  border-radius:6px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.06);
+  transform-origin: top center;
+
+  font-family:
+    "Times New Roman",
+    "Nimbus Roman",
+    "Liberation Serif",
+    "TeX Gyre Termes",
+    serif;
+
+  font-size:12pt;
+  line-height:2;
+  color:#000;
+}
+
+.doc p{ margin:0 0 0.5em 0; text-indent:0.5in; }
+.doc h1,.doc h2,.doc h3{ text-indent:0; margin:0 0 0.6em 0; font-weight:bold; line-height:1.3; }
+.doc h1{ font-size:18pt; text-align:center; margin-bottom:0.4em; }
+.doc h2{ font-size:12pt; margin-top:1.2em; }
+.doc h3{ font-size:12pt; margin-top:1.0em; }
+.doc ul,.doc ol{ margin:0 0 0.8em 1.2em; padding:0; }
+.doc li{ margin:0 0 0.2em 0; }
+.doc hr{ border:0; border-top:1px solid #000; margin:1em 0; }
+
+mark.hl{ background:#ffe58a; padding:0 1px; }
+mark.hl.active{ outline: 2px solid #ff9900; }
+
+.viewRow{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+
+.langToggle{
+  display:flex; gap:10px; align-items:center;
+  padding:6px 8px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background: linear-gradient(#fbfbfb, #dedede);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
+}
+.langToggle label{
+  display:flex; align-items:center; gap:6px;
+  font-size:13px; color:#111; cursor:pointer; user-select:none;
+}
+.langToggle input[type="radio"]{
+  appearance:none; -webkit-appearance:none;
+  width:14px; height:14px; border-radius:50%;
+  border:1px solid #777;
+  background: linear-gradient(#ffffff, #d8d8d8);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
+  position:relative;
+}
+.langToggle input[type="radio"]:checked::after{
+  content:"";
+  position:absolute; left:3px; top:3px;
+  width:6px; height:6px; border-radius:50%;
+  background:#2b2b2b;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.35);
+}
+
+.zoomGroup{ display:flex; gap:8px; align-items:center; }
+.zoomLabel{ font-size:12px; color:#555; min-width:46px; text-align:center; }
+
+.homeHero{ text-indent:0; margin:0 0 0.8em 0; }
+.homeHero .big{
+  font-size:22pt;
+  font-weight:bold;
+  line-height:1.2;
+  text-align:center;
+  margin:0 0 0.4em 0;
+}
+.homeHero .sub{
+  text-indent:0;
+  margin:0 auto 0.6em auto;
+  max-width:44em;
+  color:#222;
+}
+
+.articleList{ text-indent:0; margin:0.2em 0 0 0; padding-left:1.2em; }
+.articleList li{ margin:0.4em 0; }
+
+.notice{
+  text-indent:0;
+  border:1px solid #ddd;
+  border-radius:10px;
+  padding:10px 12px;
+  background:#fafafa;
+  color:#333;
+}
+
+@media print{
+  body{ background:#fff; }
+  .top,.left{ display:none !important; }
+  .page{ margin:0; padding:0; max-width:none; }
+  .wrap{ display:block; }
+  .right{ display:block; padding:0; }
+  .scrollPane{ display:block !important; height:auto !important; overflow:visible !important; padding:0 !important; }
+  .doc{ border:0; width:auto; max-width:none; padding:0.75in; box-shadow:none; transform:none !important; }
+}
+
+@media (max-width:900px){
+  .wrap{ display:block; }
+  .left,.right{ display:block; width:auto; padding:0; }
+  .left{ margin-bottom:10px; }
+  .scrollPane{ height:auto; overflow:visible; padding:12px 0; display:block; }
+  .doc{ width:100%; max-width:100%; padding:24px; border-left:0; border-right:0; }
+}
