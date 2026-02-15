@@ -27,7 +27,7 @@
 
   const articleListEl = document.getElementById('articleList');
 
-  // 文章区容器（你原本是两个 div：#articleEN / #articleZH）
+  const titleEl = document.getElementById('articleTitle');
   const enEl = document.getElementById('articleEN');
   const zhEl = document.getElementById('articleZH');
 
@@ -61,7 +61,6 @@
     if(!topBrand || !topHint) return;
 
     if(STATE.current){
-      // 顶栏仍显示当前文章标题/简介（这是顶栏，不是“正文标题”）
       setText(topBrand, t2(STATE.current.title_i18n || STATE.current.title, STATE.lang, STATE.lang === 'zh' ? '未命名' : 'Untitled'));
       setText(topHint,  t2(STATE.current.desc_i18n  || STATE.current.desc,  STATE.lang, ''));
       return;
@@ -74,34 +73,106 @@
 
   function updateMeta(found, idx){
     if(!meta) return;
-    // PDF iframe 内无法用你原来的 mark 高亮搜索，所以这里主要用作提示
     if(found === 0){
-      setText(meta, STATE.lang === 'zh'
-        ? 'PDF 请用 Ctrl+F 搜索'
-        : 'Use Ctrl+F to search in PDF');
+      setText(meta, STATE.lang === 'zh' ? '0 个结果' : '0 results');
     }else{
       setText(meta, `${idx+1} / ${found} ${STATE.lang === 'zh' ? '处匹配' : 'matches'}`);
     }
   }
 
-  // ====== 旧的 HTML 高亮搜索：对 PDF iframe 不可用，保留按钮但改成提示 ======
   function clearHighlights(){
+    if(!doc) return;
+    doc.querySelectorAll('mark.hl').forEach(m => {
+      m.replaceWith(document.createTextNode(m.textContent));
+    });
     STATE.hits = [];
     STATE.activeIdx = -1;
   }
-  function setActive(i){
-    STATE.activeIdx = -1;
-    updateMeta(0,0);
+
+  function getSearchRootElements(){
+    const selectorLang = root.classList.contains('lang-en') ? '[data-lang="en"]' : '[data-lang="zh"]';
+    const rootView = viewArticle && viewArticle.style.display !== 'none' ? viewArticle
+                   : viewAbout && viewAbout.style.display !== 'none' ? viewAbout
+                   : viewHome;
+    return Array.from((rootView || doc).querySelectorAll(selectorLang));
   }
+
+  function walkTextNodes(el, out){
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+      acceptNode(node){
+        if(!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        const p = node.parentElement;
+        if(p && (p.tagName === 'SCRIPT' || p.tagName === 'STYLE')) return NodeFilter.FILTER_REJECT;
+        if(p && p.tagName === 'MARK' && p.classList.contains('hl')) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    let n; while((n = walker.nextNode())) out.push(n);
+  }
+
+  function setActive(i){
+    const hits = STATE.hits;
+    if(!hits.length){
+      STATE.activeIdx = -1;
+      updateMeta(0,0);
+      return;
+    }
+    hits.forEach(m => m.classList.remove('active'));
+    STATE.activeIdx = clampMod(i, hits.length);
+    const m = hits[STATE.activeIdx];
+    m.classList.add('active');
+    m.scrollIntoView({ behavior:'smooth', block:'center' });
+    updateMeta(hits.length, STATE.activeIdx);
+  }
+
   function highlightAll(query){
-    // PDF iframe 无法注入 mark，高亮搜索改为提示
+    clearHighlights();
     const q2 = normalizeQuery(query);
     if(!q2){ updateMeta(0,0); return; }
-    updateMeta(0,0);
+
+    const needle = q2.toLowerCase();
+    const targets = getSearchRootElements();
+
+    const textNodes = [];
+    targets.forEach(el => walkTextNodes(el, textNodes));
+
+    const hits = [];
+
+    textNodes.forEach(node => {
+      const hay = node.nodeValue;
+      const low = hay.toLowerCase();
+      if(low.indexOf(needle) === -1) return;
+
+      let start = 0;
+      const parent = node.parentNode;
+      const frag = document.createDocumentFragment();
+
+      while(true){
+        const pos = low.indexOf(needle, start);
+        if(pos === -1) break;
+
+        if(pos > start) frag.appendChild(document.createTextNode(hay.slice(start, pos)));
+
+        const m = document.createElement('mark');
+        m.className = 'hl';
+        m.textContent = hay.slice(pos, pos + q2.length);
+        frag.appendChild(m);
+        hits.push(m);
+
+        start = pos + q2.length;
+      }
+
+      if(start < hay.length) frag.appendChild(document.createTextNode(hay.slice(start)));
+      parent.replaceChild(frag, node);
+    });
+
+    STATE.hits = hits;
+    if(hits.length) setActive(0);
+    else updateMeta(0,0);
   }
 
   function bindSearch(){
-    if(btnFind) btnFind.addEventListener('click', () => highlightAll(q && q.value));
+    if(btnFind) btnFind.addEventListener('click', () => highlightAll(q.value));
     if(q){
       q.addEventListener('keydown', (e) => {
         if(e.key === 'Enter'){
@@ -113,7 +184,7 @@
     if(btnPrev) btnPrev.addEventListener('click', () => setActive(STATE.activeIdx - 1));
     if(btnNext) btnNext.addEventListener('click', () => setActive(STATE.activeIdx + 1));
     if(btnClear) btnClear.addEventListener('click', () => {
-      if(q) q.value = '';
+      q.value = '';
       clearHighlights();
       updateMeta(0,0);
     });
@@ -128,18 +199,12 @@
     STATE.lang = (lang === 'zh') ? 'zh' : 'en';
     root.classList.toggle('lang-zh', STATE.lang === 'zh');
     root.classList.toggle('lang-en', STATE.lang === 'en');
-    if(q) q.placeholder = (STATE.lang === 'zh') ? (q.dataset.phZh || '在 PDF 中搜索（Ctrl+F）') : (q.dataset.phEn || 'Search in PDF (Ctrl+F)');
+    if(q) q.placeholder = (STATE.lang === 'zh') ? q.dataset.phZh : q.dataset.phEn;
     clearHighlights();
     updateMeta(0,0);
     syncLangRadios();
     safeSet('pgz_lang', STATE.lang);
     renderTopbar();
-
-    // 如果正在看文章：切换语言时切换 PDF
-    if(STATE.current){
-      renderPdfForCurrent();
-      renderList(); // 高亮保持
-    }
   }
 
   function bindLang(){
@@ -147,8 +212,6 @@
     if(langZH) langZH.addEventListener('change', () => { if(langZH.checked) applyLang('zh'); });
   }
 
-  // ====== Zoom：iframe 内的 PDF 缩放无法像 HTML 那样 transform（跨域/插件渲染）
-  // 这里保留你原来的 doc 缩放（如果你的 PDF 容器在 #doc 内，会整体缩放 iframe，体验还可以）
   function setZoom(z){
     const nz = clamp(z, 0.8, 1.3);
     STATE.zoom = nz;
@@ -169,7 +232,6 @@
   }
 
   function bindPdf(){
-    // 这里的“PDF按钮”我理解是打印/导出 PDF（window.print）
     if(btnPdf) btnPdf.addEventListener('click', () => window.print());
   }
 
@@ -215,8 +277,8 @@
     const items = Array.isArray(STATE.articles) ? STATE.articles.slice() : [];
     if(items.length === 0){
       articleListEl.innerHTML = `
-        <li data-lang="en">No articles yet. Add PDFs into /articles and update /articles/articles.json.</li>
-        <li data-lang="zh">暂无文章。把 PDF 放入 /articles 并更新 /articles/articles.json。</li>
+        <li data-lang="en">No articles yet. Add DOCX into /articles and update /articles/articles.json.</li>
+        <li data-lang="zh">暂无文章。把 DOCX 放入 /articles 并更新 /articles/articles.json。</li>
       `;
       return;
     }
@@ -227,13 +289,10 @@
       const id = encodeURIComponent(a.id || '');
       const title = escapeHtml(pickTitleForList(a));
       const date = escapeHtml(a.date || a.updated || '');
-      const hasEN = !!(a.en_pdf || (a.pdf && a.pdf.en) || a.en);
-      const hasZH = !!(a.zh_pdf || (a.pdf && a.pdf.zh) || a.zh);
-
-      const isActive = !!(STATE.current && STATE.current.id === a.id);
-
+      const hasEN = !!(a.en || (a.docx && a.docx.en));
+      const hasZH = !!(a.zh || (a.docx && a.docx.zh));
       return `
-        <li class="${isActive ? 'active' : ''}" style="text-indent:0;">
+        <li style="text-indent:0;">
           <a href="#/article/${id}">${title}</a>
           <span style="color:#666; font-size:11pt;">${date ? ' ('+date+')' : ''}</span>
           <span style="color:#666; font-size:11pt; margin-left:6px;">
@@ -250,81 +309,41 @@
     el.innerHTML = html || '';
   }
 
+  function setArticleTitle(titleAny){
+    if(!titleEl) return;
+    const t = escapeHtml(titleAny || (STATE.lang === 'zh' ? '未命名' : 'Untitled'));
+    titleEl.innerHTML = `<span data-lang="en">${t}</span><span data-lang="zh">${t}</span>`;
+  }
+
   function showNotFound(){
     STATE.current = null;
     renderTopbar();
-    showView('article');
-    renderList();
+    setArticleTitle(STATE.lang === 'zh' ? '未找到文章' : 'Article not found');
     setInner(enEl, `<div class="notice">This article ID does not exist in articles.json.</div>`);
     setInner(zhEl, `<div class="notice">该文章 ID 不存在于 articles.json。</div>`);
   }
 
   function missingLang(which){
-    if(which === 'en') setInner(enEl, `<div class="notice">English PDF not provided.</div>`);
-    else setInner(zhEl, `<div class="notice">中文 PDF 未提供。</div>`);
+    if(which === 'en') setInner(enEl, `<div class="notice">English version not provided.</div>`);
+    else setInner(zhEl, `<div class="notice">中文版本未提供。</div>`);
   }
 
-  // ====== PDF 路径解析：支持多种写法
-  // 推荐：articles.json 里写 pdf.en="file.pdf"（纯文件名）
-  // 也兼容你写 "articles/file.pdf"（会自动去重）
-  function resolvePdfPath(item, lang){
-    const v1 = item && item[lang + '_pdf']; // en_pdf / zh_pdf
-    const v2 = item && item.pdf && item.pdf[lang]; // pdf.en / pdf.zh
-    const v3 = item && item[lang]; // 兼容旧字段（如果你偷懒写 en:"xxx.pdf" 也行）
-    const picked = v1 || v2 || v3 || '';
+  async function loadDocxToHtml(path){
+    if(!window.mammoth) throw new Error('mammoth not loaded');
+    const r = await fetch(path, { cache:'no-store' });
+    if(!r.ok) throw new Error(`Failed to fetch ${path}`);
+    const buf = await r.arrayBuffer();
+    const res = await window.mammoth.convertToHtml({ arrayBuffer: buf });
+    return (res.value || '').trim();
+  }
+
+  function resolveDocPath(item, lang){
+    const v1 = item && item[lang];
+    const v2 = item && item.docx && item.docx[lang];
+    const picked = v1 || v2 || '';
     if(!picked) return '';
     if(/^https?:\/\//i.test(picked)) return picked;
-
-    // 去掉前导斜杠
-    let p = picked.replace(/^\/+/, '');
-
-    // 如果已经带了 "articles/" 前缀，就不要再重复加
-    if(p.toLowerCase().startsWith('articles/')) return p;
-
-    return `articles/${p}`;
-  }
-
-  function makePdfEmbed(path){
-    // 用 iframe 直接打开浏览器 PDF viewer（最省事、最稳）
-    // 加上 #toolbar=1 可显示工具栏；你也可以改成 0
-    const src = `${path}#toolbar=1&navpanes=0&scrollbar=1`;
-    return `
-      <div class="pdfWrap" style="width:100%; height: calc(100vh - 180px);">
-        <iframe
-          class="pdfFrame"
-          src="${escapeHtml(src)}"
-          style="width:100%; height:100%; border:0; background:#fff;"
-          loading="lazy"
-        ></iframe>
-      </div>
-    `;
-  }
-
-  function renderPdfForCurrent(){
-    const item = STATE.current;
-    if(!item) return;
-
-    // 清空两栏
-    setInner(enEl, '');
-    setInner(zhEl, '');
-
-    const enPath = resolvePdfPath(item, 'en');
-    const zhPath = resolvePdfPath(item, 'zh');
-
-    // 你现有结构应该是两块：#articleEN / #articleZH，并用 lang class 控制显示
-    if(enPath){
-      setInner(enEl, makePdfEmbed(enPath));
-    }else{
-      missingLang('en');
-    }
-
-    if(zhPath){
-      setInner(zhEl, makePdfEmbed(zhPath));
-    }else{
-      missingLang('zh');
-    }
-
-    updateMeta(0,0);
+    return `articles/${picked.replace(/^\/+/, '')}`;
   }
 
   async function renderArticleById(idRaw){
@@ -334,13 +353,54 @@
 
     STATE.current = item;
     showView('article');
+
+    const titleForUI = pickTitleForList(item);
+    setArticleTitle(titleForUI);
+    setInner(enEl, '');
+    setInner(zhEl, '');
+
     renderTopbar();
 
-    // ✅ 关键：进入文章时重绘列表，让目录高亮当前文章
-    renderList();
+    const enPath = resolveDocPath(item, 'en');
+    const zhPath = resolveDocPath(item, 'zh');
 
-    // ✅ 不渲染正文标题：这里不做 setArticleTitle 之类任何操作
-    renderPdfForCurrent();
+    let enOk = false;
+    let zhOk = false;
+
+    if(enPath){
+      if(enPath.toLowerCase().endsWith('.doc')){
+        setInner(enEl, `<div class="notice">.doc is not supported on static hosting. Please convert to .docx.</div>`);
+      }else{
+        try{
+          const html = await loadDocxToHtml(enPath);
+          setInner(enEl, html || `<div class="notice">Empty content.</div>`);
+          enOk = true;
+        }catch(e){
+          setInner(enEl, `<div class="notice">Failed to load EN DOCX: ${escapeHtml(String(e.message || e))}</div>`);
+        }
+      }
+    }
+
+    if(zhPath){
+      if(zhPath.toLowerCase().endsWith('.doc')){
+        setInner(zhEl, `<div class="notice">.doc 在静态托管下无法可靠解析，请转为 .docx。</div>`);
+      }else{
+        try{
+          const html = await loadDocxToHtml(zhPath);
+          setInner(zhEl, html || `<div class="notice">内容为空。</div>`);
+          zhOk = true;
+        }catch(e){
+          setInner(zhEl, `<div class="notice">加载中文 DOCX 失败：${escapeHtml(String(e.message || e))}</div>`);
+        }
+      }
+    }
+
+    if(!enPath) missingLang('en');
+    if(!zhPath) missingLang('zh');
+
+    if(!enOk && !zhOk && (enPath || zhPath)){
+      updateMeta(0,0);
+    }
   }
 
   function parseRoute(){
@@ -359,7 +419,6 @@
       STATE.current = null;
       showView('about');
       renderTopbar();
-      renderList(); // 回到 about 也刷新列表，清掉 active
       return;
     }
     if(r.name === 'article'){
@@ -405,14 +464,16 @@
 
     STATE.articles = (arr || []).filter(Boolean).map(a => {
       const out = Object.assign({}, a);
-
       if(out.title && (typeof out.title === 'object')) out.title_i18n = out.title;
       if(out.desc  && (typeof out.desc  === 'object')) out.desc_i18n  = out.desc;
 
       if(typeof out.title === 'string' && !out.title_i18n) out.title_i18n = { en: out.title, zh: out.title };
       if(typeof out.desc  === 'string' && !out.desc_i18n)  out.desc_i18n  = { en: out.desc,  zh: out.desc  };
 
-      // 兼容老字段：如果你写了 pdf:{en:"x.pdf"}，这里不需要额外处理
+      if(out.docx && typeof out.docx === 'object'){
+        if(!out.en && out.docx.en) out.en = out.docx.en;
+        if(!out.zh && out.docx.zh) out.zh = out.docx.zh;
+      }
       return out;
     });
   }
@@ -456,7 +517,6 @@
     }
 
     renderTopbar();
-    renderList();
 
     window.addEventListener('hashchange', () => { handleRoute(); });
     await handleRoute();
