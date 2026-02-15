@@ -216,7 +216,7 @@
   }
 
   function setZoom(z){
-    const nz = clamp(z, 0.9, 1.4);
+    const nz = clamp(z, 0.9, 1.3);
     STATE.zoom = nz;
     if(doc){
       doc.style.transform = `scale(${nz})`;
