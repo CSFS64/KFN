@@ -208,17 +208,6 @@ li{ margin:6px 0; }
   text-indent:0;
 }
 
-.homeInfo{
-  margin:0.6em 0 1.2em 0;
-}
-
-.homeLegal{
-  font-size:11pt;
-  color:#333;
-  margin-top:1.6em;
-  text-indent:0;
-}
-
 .homeList{ margin:0.2em 0 0 1.2em; padding:0; }
 
 .homeFoot{ margin-top:1.8em; text-indent:0; }
