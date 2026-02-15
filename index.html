@@ -86,33 +86,50 @@
         <div class="scrollPane" id="scrollPane">
           <div class="doc" role="document" id="doc">
 
-            <div id="viewHome">
+            <section id="viewHome">
               <div class="homeHero">
-                <div class="big" data-lang="en">GRAY ZONE ARCHIVE</div>
-                <div class="big" data-lang="zh">灰色地带档案库</div>
-
-                <p class="sub" data-lang="en" style="text-indent:0;">
-                  A living index of Project Gray Zone articles. Click any entry to open the full document with the same reading tools.
-                </p>
-                <p class="sub" data-lang="zh" style="text-indent:0;">
-                  Project Gray Zone 的文章总索引。点击任意条目进入全文页面，并继续使用同一套阅读工具。
-                </p>
+                <div class="homeTitle" data-lang="en">Kalyna Field Notes</div>
+                <div class="homeTitle" data-lang="zh">Kalyna 前线笔记</div>
+            
+                <div class="homeLead" data-lang="en">
+                  A lightweight reading desk for field notes, briefs, and references.
+                  Open an entry below to read with search, zoom, and print.
+                </div>
+                <div class="homeLead" data-lang="zh">
+                  一个轻量的阅读桌面，用于整理前线笔记、简报与参考资料。
+                  选择下方条目即可进入全文阅读，并支持搜索、缩放与打印。
+                </div>
+            
+                <div class="homeActions">
+                  <a class="btn" href="#/articles" data-lang="en">Browse Articles</a>
+                  <a class="btn" href="#/articles" data-lang="zh">浏览文章</a>
+            
+                  <a class="btn" href="#/about" data-lang="en">About</a>
+                  <a class="btn" href="#/about" data-lang="zh">关于</a>
+                </div>
+            
+                <div class="homeTips">
+                  <div class="homeTip" data-lang="en">
+                    <b>Tip:</b> The search box highlights matches in the current view (home / article / about).
+                  </div>
+                  <div class="homeTip" data-lang="zh">
+                    <b>提示：</b>左侧搜索框会在当前页面（主页/文章/关于）高亮匹配内容。
+                  </div>
+                </div>
               </div>
-
-              <h2 id="articlesTitle" data-lang="en">All Articles</h2>
-              <h2 id="articlesTitleZH" data-lang="zh">全部文章</h2>
-
-              <ol class="articleList" id="articleList"></ol>
-
-              <hr>
-
-              <p data-lang="en" style="text-indent:0;">
-                Repository-driven: put .docx files in /articles, update /articles/articles.json, and the site will render them automatically.
-              </p>
-              <p data-lang="zh" style="text-indent:0;">
-                仓库驱动：把 .docx 放进 /articles，更新 /articles/articles.json，页面会自动渲染排版。
-              </p>
-            </div>
+            
+              <h2 class="homeSection" data-lang="en">Latest Entries</h2>
+              <h2 class="homeSection" data-lang="zh">最新条目</h2>
+            
+              <ul id="articleList" class="homeList"></ul>
+            
+              <div class="homeFoot small" data-lang="en">
+                This is a static archive viewer. Content is for research and educational use.
+              </div>
+              <div class="homeFoot small" data-lang="zh">
+                KFN 是一个静态归档阅读器。内容用于研究与教育用途。
+              </div>
+            </section>
 
             <div id="viewArticle" style="display:none;">
               <div id="top"></div>
