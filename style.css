@@ -229,6 +229,18 @@ li{ margin:6px 0; }
 
 .doc [id]{ scroll-margin-top:12px; }
 
+.doc img{
+  display:block;
+  max-width:100%;
+  height:auto;
+}
+
+.doc p:has(> img){
+  text-indent:0;
+  margin:1.0em 0 1.0em 0;
+  text-align:center;
+}
+
 /* ===== APA References ===== */
 .doc .apa-ref{
   text-indent:-0.5in !important;
