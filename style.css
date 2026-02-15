@@ -290,6 +290,48 @@ mark.hl.active{
   text-align:center;
 }
 
+/* ===== 补丁 ===== */
+#doc [data-lang="en"] p,
+#doc [data-lang="zh"] p{
+  text-indent: 2em;
+  margin: 0 0 0.8em 0;
+  line-height: 1.65;
+}
+
+#doc h1, #doc h2, #doc h3, #doc h4,
+#doc .kfn-title, #doc .kfn-h2, #doc .kfn-h3, #doc .kfn-h4{
+  text-indent: 0 !important;
+  margin: 1.1em 0 0.6em 0;
+  line-height: 1.25;
+}
+
+#doc h2 + p, #doc h3 + p, #doc h4 + p{
+  text-indent: 0;
+}
+
+#doc blockquote.kfn-quote{
+  margin: 0.8em 0;
+  padding-left: 1em;
+  border-left: 3px solid #bbb;
+  text-indent: 0;
+}
+
+#doc .apa-ref{
+  text-indent: -2em !important;
+  padding-left: 2em;
+  margin: 0 0 0.6em 0;
+  line-height: 1.6;
+}
+
+#doc .apa-ref a{
+  word-break: break-word;
+}
+
+#articleList li.active > a{
+  font-weight: 700;
+  text-decoration: underline;
+}
+
 /* ===== Print ===== */
 @media print{
   body{ background:#fff; }
