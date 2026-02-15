@@ -205,6 +205,9 @@
     syncLangRadios();
     safeSet('pgz_lang', STATE.lang);
     renderTopbar();
+
+    // ✅ 语言切换时如果在文章页，也刷新列表高亮
+    renderList();
   }
 
   function bindLang(){
@@ -264,13 +267,6 @@
     return alt || (STATE.lang === 'zh' ? '未命名' : 'Untitled');
   }
 
-  function pickDesc(item){
-    const d = item.desc_i18n || item.desc;
-    const s = t2(d, STATE.lang, '');
-    if(s) return s;
-    return t2(d, STATE.lang === 'zh' ? 'en' : 'zh', '');
-  }
-
   function renderList(){
     if(!articleListEl) return;
 
@@ -291,8 +287,10 @@
       const date = escapeHtml(a.date || a.updated || '');
       const hasEN = !!(a.en || (a.docx && a.docx.en));
       const hasZH = !!(a.zh || (a.docx && a.docx.zh));
+      const isActive = !!(STATE.current && STATE.current.id === a.id);
+
       return `
-        <li style="text-indent:0;">
+        <li class="${isActive ? 'active' : ''}" style="text-indent:0;">
           <a href="#/article/${id}">${title}</a>
           <span style="color:#666; font-size:11pt;">${date ? ' ('+date+')' : ''}</span>
           <span style="color:#666; font-size:11pt; margin-left:6px;">
@@ -315,10 +313,75 @@
     titleEl.innerHTML = `<span data-lang="en">${t}</span><span data-lang="zh">${t}</span>`;
   }
 
+  // ✅ APA + URL 后处理：识别 References/参考文献，并给其后的 p 加悬挂缩进 class
+  function postProcessApaReferences(container){
+    if(!container) return;
+
+    // 1) 裸 URL 变链接（不影响已有链接）
+    container.querySelectorAll('p').forEach(p => {
+      if(p.querySelector('a')) return;
+      const txt = (p.textContent || '').trim();
+      if(!txt) return;
+
+      const m = txt.match(/https?:\/\/\S+/);
+      if(!m) return;
+
+      const url0 = m[0];
+      const url = url0.replace(/[)\],.]+$/, ''); // 尾部常见符号粗略剥离
+      const safeUrl = escapeHtml(url);
+
+      // 用 textContent 匹配替换会丢格式；这里用 innerHTML 简替换（够用）
+      p.innerHTML = p.innerHTML.replace(url, `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeUrl}</a>`);
+    });
+
+    // 2) References 区段：标题后面的 p 全部标注 .apa-ref，直到下一个标题为止
+    const nodes = Array.from(container.querySelectorAll('h1,h2,h3,h4,p'));
+
+    let inRefs = false;
+
+    const isHeadingEl = (el) => {
+      const t = el.tagName;
+      return (t === 'H1' || t === 'H2' || t === 'H3' || t === 'H4');
+    };
+
+    const isRefsTitleText = (s) => {
+      const t = (s || '').trim().toLowerCase();
+      return (
+        t === 'references' ||
+        t === 'reference' ||
+        t === '参考文献' ||
+        t === '引用文献' ||
+        t === 'references:' ||
+        t === '参考文献：'
+      );
+    };
+
+    for(const el of nodes){
+      if(isHeadingEl(el) && isRefsTitleText(el.textContent)){
+        inRefs = true;
+        continue;
+      }
+
+      if(inRefs && isHeadingEl(el)){
+        break; // 下一个标题开始，refs 结束
+      }
+
+      if(inRefs && el.tagName === 'P'){
+        const txt = (el.textContent || '').trim();
+        if(!txt) continue;
+        el.classList.add('apa-ref');
+      }
+    }
+  }
+
   function showNotFound(){
     STATE.current = null;
     renderTopbar();
-    setArticleTitle(STATE.lang === 'zh' ? '未找到文章' : 'Article not found');
+    renderList();
+
+    // ✅ 文章页标题区不想要：直接清空
+    if(titleEl) titleEl.innerHTML = '';
+
     setInner(enEl, `<div class="notice">This article ID does not exist in articles.json.</div>`);
     setInner(zhEl, `<div class="notice">该文章 ID 不存在于 articles.json。</div>`);
   }
@@ -330,21 +393,24 @@
 
   async function loadDocxToHtml(path){
     if(!window.mammoth) throw new Error('mammoth not loaded');
-  
+
     const r = await fetch(path, { cache:'no-store' });
     if(!r.ok) throw new Error(`Failed to fetch ${path}`);
-  
+
     const buf = await r.arrayBuffer();
-  
+
     const options = {
       styleMap: [
+        // ✅ Word 样式 → HTML 标题（关键：让标题不缩进）
         "p[style-name='Title'] => h1.kfn-title:fresh",
         "p[style-name='Heading 1'] => h2.kfn-h2:fresh",
         "p[style-name='Heading 2'] => h3.kfn-h3:fresh",
         "p[style-name='Heading 3'] => h4.kfn-h4:fresh",
-  
+
+        // 引用（可选）
         "p[style-name='Quote'] => blockquote.kfn-quote:fresh",
-  
+
+        // 列表段落（可选）
         "p[style-name='List Paragraph'] => p.kfn-li:fresh"
       ],
       convertImage: window.mammoth.images.inline(function(image) {
@@ -353,7 +419,7 @@
         });
       })
     };
-  
+
     const res = await window.mammoth.convertToHtml({ arrayBuffer: buf }, options);
     return (res.value || '').trim();
   }
@@ -364,7 +430,11 @@
     const picked = v1 || v2 || '';
     if(!picked) return '';
     if(/^https?:\/\//i.test(picked)) return picked;
-    return `articles/${picked.replace(/^\/+/, '')}`;
+
+    // ✅ 兼容你 JSON 里写了 "articles/xxx.docx" 的情况：避免 articles/articles/
+    let p = picked.replace(/^\/+/, '');
+    if(p.toLowerCase().startsWith('articles/')) return p;
+    return `articles/${p}`;
   }
 
   async function renderArticleById(idRaw){
@@ -375,12 +445,17 @@
     STATE.current = item;
     showView('article');
 
-    const titleForUI = pickTitleForList(item);
-    setArticleTitle(titleForUI);
+    // ✅ 不想要自动标题：清空 articleTitle（顶栏仍显示）
+    if(titleEl) titleEl.innerHTML = '';
+    // 如果你以后又想显示文章页标题，把下面这行取消注释：
+    // setArticleTitle(pickTitleForList(item));
+
     setInner(enEl, '');
     setInner(zhEl, '');
 
+    // ✅ 关键：进入文章时立刻刷新顶栏 + 目录高亮
     renderTopbar();
+    renderList();
 
     const enPath = resolveDocPath(item, 'en');
     const zhPath = resolveDocPath(item, 'zh');
@@ -395,6 +470,7 @@
         try{
           const html = await loadDocxToHtml(enPath);
           setInner(enEl, html || `<div class="notice">Empty content.</div>`);
+          postProcessApaReferences(enEl);
           enOk = true;
         }catch(e){
           setInner(enEl, `<div class="notice">Failed to load EN DOCX: ${escapeHtml(String(e.message || e))}</div>`);
@@ -409,6 +485,7 @@
         try{
           const html = await loadDocxToHtml(zhPath);
           setInner(zhEl, html || `<div class="notice">内容为空。</div>`);
+          postProcessApaReferences(zhEl);
           zhOk = true;
         }catch(e){
           setInner(zhEl, `<div class="notice">加载中文 DOCX 失败：${escapeHtml(String(e.message || e))}</div>`);
@@ -440,6 +517,7 @@
       STATE.current = null;
       showView('about');
       renderTopbar();
+      renderList();
       return;
     }
     if(r.name === 'article'){
