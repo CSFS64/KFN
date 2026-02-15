@@ -9,9 +9,9 @@
     {
       "id": "gray-zone",
       "slug": "project-gray-zone",
-      "pdf": {
-        "en": "project-gray-zone.en.pdf",
-        "zh": "project-gray-zone.zh.pdf"
+      "docx": {
+        "en": "project-gray-zone.en.docx",
+        "zh": "project-gray-zone.zh.docx"
       },
       "title": {
         "en": "Project Gray Zone",
