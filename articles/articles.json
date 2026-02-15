@@ -17,10 +17,10 @@
         "en": "Project Gray Zone",
         "zh": "Project Gray Zone"
       },
-      "desc": {
-        "en": "The meaning of “gray zones” is changing. We aim to promote a more accurate framework aligned with today’s battlefield reality.",
-        "zh": "灰色地带的含义正在变化。我们希望推动更准确、更符合当下战场现实的理解方式。"
-      },
+      "pdf": {
+        "en": "project-gray-zone.en.pdf",
+        "zh": "project-gray-zone.zh.pdf"
+      }
       "updated": "2026-02-14"
     }
   ]
