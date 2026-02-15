@@ -36,7 +36,7 @@
 
   const STATE = {
     lang: 'en',
-    zoom: 1,
+    zoom: 1.1,
     hits: [],
     activeIdx: -1,
     articles: [],
@@ -216,7 +216,7 @@
   }
 
   function setZoom(z){
-    const nz = clamp(z, 0.8, 1.3);
+    const nz = clamp(z, 0.9, 1.4);
     STATE.zoom = nz;
     if(doc){
       doc.style.transform = `scale(${nz})`;
@@ -594,7 +594,7 @@
     applyLang((savedLang === 'zh' || savedLang === 'en') ? savedLang : 'en');
 
     const savedZoom = parseFloat(safeGet('pgz_zoom') || '');
-    setZoom(Number.isFinite(savedZoom) ? savedZoom : 1);
+    setZoom(Number.isFinite(savedZoom) ? savedZoom : 1.1);
 
     updateMeta(0,0);
 
