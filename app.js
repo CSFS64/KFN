@@ -330,10 +330,31 @@
 
   async function loadDocxToHtml(path){
     if(!window.mammoth) throw new Error('mammoth not loaded');
+  
     const r = await fetch(path, { cache:'no-store' });
     if(!r.ok) throw new Error(`Failed to fetch ${path}`);
+  
     const buf = await r.arrayBuffer();
-    const res = await window.mammoth.convertToHtml({ arrayBuffer: buf });
+  
+    const options = {
+      styleMap: [
+        "p[style-name='Title'] => h1.kfn-title:fresh",
+        "p[style-name='Heading 1'] => h2.kfn-h2:fresh",
+        "p[style-name='Heading 2'] => h3.kfn-h3:fresh",
+        "p[style-name='Heading 3'] => h4.kfn-h4:fresh",
+  
+        "p[style-name='Quote'] => blockquote.kfn-quote:fresh",
+  
+        "p[style-name='List Paragraph'] => p.kfn-li:fresh"
+      ],
+      convertImage: window.mammoth.images.inline(function(image) {
+        return image.read("base64").then(function(imageBuffer) {
+          return { src: "data:" + image.contentType + ";base64," + imageBuffer };
+        });
+      })
+    };
+  
+    const res = await window.mammoth.convertToHtml({ arrayBuffer: buf }, options);
     return (res.value || '').trim();
   }
 
