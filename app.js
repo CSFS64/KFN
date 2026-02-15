@@ -31,7 +31,18 @@
   const enEl = document.getElementById('articleEN');
   const zhEl = document.getElementById('articleZH');
 
-  const STATE = { lang:'en', zoom:1, hits:[], activeIdx:-1, articles:[] };
+  const topBrand = document.getElementById('topBrand');
+  const topHint  = document.getElementById('topHint');
+
+  const STATE = {
+    lang: 'en',
+    zoom: 1,
+    hits: [],
+    activeIdx: -1,
+    articles: [],
+    site: null,
+    current: null
+  };
 
   function safeGet(key){ try { return localStorage.getItem(key); } catch(e){ return null; } }
   function safeSet(key,val){ try { localStorage.setItem(key,val); } catch(e){} }
@@ -39,6 +50,26 @@
   function normalizeQuery(s){ return (s||'').trim(); }
   function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
   function clampMod(i,n){ if(n<=0) return -1; return ((i % n) + n) % n; }
+
+  function t2(obj, lang, fallback){
+    if(obj == null) return fallback || '';
+    if(typeof obj === 'string') return obj;
+    return obj[lang] || obj.en || obj.zh || fallback || '';
+  }
+
+  function renderTopbar(){
+    if(!topBrand || !topHint) return;
+
+    if(STATE.current){
+      setText(topBrand, t2(STATE.current.title_i18n || STATE.current.title, STATE.lang, STATE.lang === 'zh' ? '未命名' : 'Untitled'));
+      setText(topHint,  t2(STATE.current.desc_i18n  || STATE.current.desc,  STATE.lang, ''));
+      return;
+    }
+
+    const site = STATE.site || {};
+    setText(topBrand, t2(site.title, STATE.lang, 'Kalyna Field Notes'));
+    setText(topHint,  t2(site.desc,  STATE.lang, ''));
+  }
 
   function updateMeta(found, idx){
     if(!meta) return;
@@ -173,6 +204,7 @@
     updateMeta(0,0);
     syncLangRadios();
     safeSet('pgz_lang', STATE.lang);
+    renderTopbar();
   }
 
   function bindLang(){
@@ -207,9 +239,7 @@
     if(viewHome) viewHome.style.display = (which === 'home') ? '' : 'none';
     if(viewArticle) viewArticle.style.display = (which === 'article') ? '' : 'none';
     if(viewAbout) viewAbout.style.display = (which === 'about') ? '' : 'none';
-
     if(btnHome) btnHome.style.display = (which === 'article') ? '' : 'none';
-
     clearHighlights();
     updateMeta(0,0);
   }
@@ -226,6 +256,21 @@
     return await r.json();
   }
 
+  function pickTitleForList(item){
+    const t = item.title_i18n || item.title;
+    const s = t2(t, STATE.lang, '');
+    if(s) return s;
+    const alt = t2(t, STATE.lang === 'zh' ? 'en' : 'zh', '');
+    return alt || (STATE.lang === 'zh' ? '未命名' : 'Untitled');
+  }
+
+  function pickDesc(item){
+    const d = item.desc_i18n || item.desc;
+    const s = t2(d, STATE.lang, '');
+    if(s) return s;
+    return t2(d, STATE.lang === 'zh' ? 'en' : 'zh', '');
+  }
+
   function renderList(){
     if(!articleListEl) return;
 
@@ -238,14 +283,14 @@
       return;
     }
 
-    items.sort((a,b) => (b.date || '').localeCompare(a.date || ''));
+    items.sort((a,b) => (b.date || b.updated || '').localeCompare(a.date || a.updated || ''));
 
     articleListEl.innerHTML = items.map(a => {
       const id = encodeURIComponent(a.id || '');
-      const title = escapeHtml(a.title || 'Untitled');
-      const date = escapeHtml(a.date || '');
-      const hasEN = !!a.en;
-      const hasZH = !!a.zh;
+      const title = escapeHtml(pickTitleForList(a));
+      const date = escapeHtml(a.date || a.updated || '');
+      const hasEN = !!(a.en || (a.docx && a.docx.en));
+      const hasZH = !!(a.zh || (a.docx && a.docx.zh));
       return `
         <li style="text-indent:0;">
           <a href="#/article/${id}">${title}</a>
@@ -264,14 +309,16 @@
     el.innerHTML = html || '';
   }
 
-  function setTitle(title){
+  function setArticleTitle(titleAny){
     if(!titleEl) return;
-    const t = escapeHtml(title || 'Untitled');
+    const t = escapeHtml(titleAny || (STATE.lang === 'zh' ? '未命名' : 'Untitled'));
     titleEl.innerHTML = `<span data-lang="en">${t}</span><span data-lang="zh">${t}</span>`;
   }
 
   function showNotFound(){
-    setTitle(STATE.lang === 'zh' ? '未找到文章' : 'Article not found');
+    STATE.current = null;
+    renderTopbar();
+    setArticleTitle(STATE.lang === 'zh' ? '未找到文章' : 'Article not found');
     setInner(enEl, `<div class="notice">This article ID does not exist in articles.json.</div>`);
     setInner(zhEl, `<div class="notice">该文章 ID 不存在于 articles.json。</div>`);
   }
@@ -290,19 +337,32 @@
     return (res.value || '').trim();
   }
 
+  function resolveDocPath(item, lang){
+    const v1 = item && item[lang];
+    const v2 = item && item.docx && item.docx[lang];
+    const picked = v1 || v2 || '';
+    if(!picked) return '';
+    if(/^https?:\/\//i.test(picked)) return picked;
+    return `articles/${picked.replace(/^\/+/, '')}`;
+  }
+
   async function renderArticleById(idRaw){
     const id = decodeURIComponent(idRaw || '');
     const item = (STATE.articles || []).find(x => x && x.id === id);
     if(!item){ showNotFound(); return; }
 
+    STATE.current = item;
     showView('article');
-    setTitle(item.title || 'Untitled');
 
+    const titleForUI = pickTitleForList(item);
+    setArticleTitle(titleForUI);
     setInner(enEl, '');
     setInner(zhEl, '');
 
-    const enPath = item.en ? `articles/${item.en}` : '';
-    const zhPath = item.zh ? `articles/${item.zh}` : '';
+    renderTopbar();
+
+    const enPath = resolveDocPath(item, 'en');
+    const zhPath = resolveDocPath(item, 'zh');
 
     let enOk = false;
     let zhOk = false;
@@ -356,22 +416,24 @@
   async function handleRoute(){
     const r = parseRoute();
     if(r.name === 'about'){
+      STATE.current = null;
       showView('about');
+      renderTopbar();
       return;
     }
     if(r.name === 'article'){
       await renderArticleById(r.id);
       return;
     }
+    STATE.current = null;
     showView('home');
+    renderTopbar();
     renderList();
   }
 
   function bindAnchors(){
     document.querySelectorAll('a[href^="#"]').forEach(a => {
-      a.addEventListener('click', function(e){
-        const href = a.getAttribute('href');
-        if(!href || !href.startsWith('#')) return;
+      a.addEventListener('click', function(){
         clearHighlights();
         updateMeta(0,0);
       });
@@ -384,8 +446,36 @@
 
   async function initData(){
     const data = await fetchJson('articles/articles.json');
-    const arr = Array.isArray(data) ? data : (Array.isArray(data.articles) ? data.articles : []);
-    STATE.articles = arr.filter(Boolean);
+
+    let arr = [];
+    let site = null;
+
+    if(Array.isArray(data)){
+      arr = data;
+    }else{
+      if(Array.isArray(data.articles)) arr = data.articles;
+      if(data.site && typeof data.site === 'object') site = data.site;
+    }
+
+    STATE.site = site || {
+      title: { en:'Kalyna Field Notes', zh:'Kalyna 前线笔记' },
+      desc:  { en:'A reading tool and archive for OSINT notes, briefs, and references.', zh:'用于整理与阅读 OSINT 笔记、简报与参考资料的归档工具。' }
+    };
+
+    STATE.articles = (arr || []).filter(Boolean).map(a => {
+      const out = Object.assign({}, a);
+      if(out.title && (typeof out.title === 'object')) out.title_i18n = out.title;
+      if(out.desc  && (typeof out.desc  === 'object')) out.desc_i18n  = out.desc;
+
+      if(typeof out.title === 'string' && !out.title_i18n) out.title_i18n = { en: out.title, zh: out.title };
+      if(typeof out.desc  === 'string' && !out.desc_i18n)  out.desc_i18n  = { en: out.desc,  zh: out.desc  };
+
+      if(out.docx && typeof out.docx === 'object'){
+        if(!out.en && out.docx.en) out.en = out.docx.en;
+        if(!out.zh && out.docx.zh) out.zh = out.docx.zh;
+      }
+      return out;
+    });
   }
 
   async function init(){
@@ -410,7 +500,13 @@
       await initData();
     }catch(e){
       STATE.articles = [];
+      STATE.site = {
+        title: { en:'Kalyna Field Notes', zh:'Kalyna 前线笔记' },
+        desc:  { en:'A reading tool and archive for OSINT notes, briefs, and references.', zh:'用于整理与阅读 OSINT 笔记、简报与参考资料的归档工具。' }
+      };
+      STATE.current = null;
       showView('home');
+      renderTopbar();
       if(articleListEl){
         articleListEl.innerHTML = `
           <li data-lang="en">Failed to load articles/articles.json</li>
@@ -419,6 +515,8 @@
       }
       return;
     }
+
+    renderTopbar();
 
     window.addEventListener('hashchange', () => { handleRoute(); });
     await handleRoute();
