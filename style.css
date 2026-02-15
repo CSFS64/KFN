@@ -100,6 +100,9 @@ li{ margin:6px 0; }
 }
 
 .btnRow{ display:flex; flex-wrap:wrap; gap:8px; }
+#btnHome{
+  margin-left:auto;
+}
 .toolbar{ display:flex; flex-direction:column; gap:10px; }
 
 .searchRow{
