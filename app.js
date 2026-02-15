@@ -500,6 +500,7 @@
     if(!enOk && !zhOk && (enPath || zhPath)){
       updateMeta(0,0);
     }
+    renderTopbar();
   }
 
   function parseRoute(){
@@ -522,6 +523,7 @@
       return;
     }
     if(r.name === 'article'){
+      showView('article');
       await renderArticleById(r.id);
       return;
     }
