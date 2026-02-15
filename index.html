@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Project Gray Zone</title>
+<link rel="stylesheet" href="style.css" />
+<script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
+</head>
+
+<body class="lang-en" id="appRoot">
+  <div class="top">
+    <div class="brand">Project Gray Zone</div>
+    <div class="hint" data-lang="zh">灰色地带的含义正在变化。我们希望推动更准确、更符合当下战场现实的理解方式。</div>
+    <div class="hint" data-lang="en">The meaning of “gray zones” is changing. We aim to promote a more accurate framework aligned with today’s battlefield reality.</div>
+  </div>
+
+  <div class="page">
+    <div class="wrap">
+      <div class="left">
+        <div class="leftInner">
+          <div class="boxTitle" data-lang="zh">搜索</div>
+          <div class="boxTitle" data-lang="en">Search</div>
+
+          <div class="toolbar">
+            <div class="searchRow">
+              <input id="q" type="text" placeholder="Type keyword (Enter to search)" data-ph-zh="输入关键词（Enter搜索）" data-ph-en="Type keyword (Enter to search)" />
+              <button class="btn" id="btnFind" type="button">Find</button>
+            </div>
+
+            <div class="btnRow">
+              <button class="btn" id="btnPrev" type="button">◀ Prev</button>
+              <button class="btn" id="btnNext" type="button">Next ▶</button>
+              <button class="btn" id="btnClear" type="button">Clear</button>
+            </div>
+
+            <div class="searchMeta" id="searchMeta">0 results</div>
+
+            <hr>
+
+            <div class="boxTitle" data-lang="zh">视图</div>
+            <div class="boxTitle" data-lang="en">View</div>
+
+            <div class="viewRow">
+              <button class="btn" id="btnHome" type="button" style="display:none;">← Home</button>
+
+              <div class="langToggle" aria-label="Language">
+                <label>
+                  <input type="radio" name="langPick" id="langEN" value="en">
+                  EN
+                </label>
+                <label>
+                  <input type="radio" name="langPick" id="langZH" value="zh">
+                  中
+                </label>
+              </div>
+
+              <div class="zoomGroup">
+                <button class="btn" id="btnZoomOut" type="button">A-</button>
+                <button class="btn" id="btnZoomIn" type="button">A+</button>
+                <span class="zoomLabel" id="zoomLabel">100%</span>
+              </div>
+
+              <button class="btn" id="btnPdf" type="button">Download PDF</button>
+            </div>
+
+            <hr>
+
+            <div class="boxTitle" data-lang="zh">目录</div>
+            <div class="boxTitle" data-lang="en">Contents</div>
+
+            <ul id="toc">
+              <li><a href="#/" data-lang="zh">主页</a><a href="#/" data-lang="en">Home</a></li>
+              <li><a href="#/articles" data-lang="zh">文章列表</a><a href="#/articles" data-lang="en">Articles</a></li>
+              <li><a href="#/about" data-lang="zh">说明</a><a href="#/about" data-lang="en">Notes</a></li>
+            </ul>
+
+            <hr>
+
+            <div class="small" data-lang="zh">提示：文内搜索会高亮匹配项，并可 Prev/Next 跳转。</div>
+            <div class="small" data-lang="en">Tip: Search highlights matches and lets you jump Prev/Next.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="right">
+        <div class="scrollPane" id="scrollPane">
+          <div class="doc" role="document" id="doc">
+
+            <div id="viewHome">
+              <div class="homeHero">
+                <div class="big" data-lang="en">GRAY ZONE ARCHIVE</div>
+                <div class="big" data-lang="zh">灰色地带档案库</div>
+
+                <p class="sub" data-lang="en" style="text-indent:0;">
+                  A living index of Project Gray Zone articles. Click any entry to open the full document with the same reading tools.
+                </p>
+                <p class="sub" data-lang="zh" style="text-indent:0;">
+                  Project Gray Zone 的文章总索引。点击任意条目进入全文页面，并继续使用同一套阅读工具。
+                </p>
+              </div>
+
+              <h2 id="articlesTitle" data-lang="en">All Articles</h2>
+              <h2 id="articlesTitleZH" data-lang="zh">全部文章</h2>
+
+              <ol class="articleList" id="articleList"></ol>
+
+              <hr>
+
+              <p data-lang="en" style="text-indent:0;">
+                Repository-driven: put .docx files in /articles, update /articles/articles.json, and the site will render them automatically.
+              </p>
+              <p data-lang="zh" style="text-indent:0;">
+                仓库驱动：把 .docx 放进 /articles，更新 /articles/articles.json，页面会自动渲染排版。
+              </p>
+            </div>
+
+            <div id="viewArticle" style="display:none;">
+              <div id="top"></div>
+              <h1 id="articleTitle">
+                <span data-lang="en">Loading…</span>
+                <span data-lang="zh">正在加载…</span>
+              </h1>
+
+              <div id="articleEN" data-lang="en"></div>
+              <div id="articleZH" data-lang="zh"></div>
+            </div>
+
+            <div id="viewAbout" style="display:none;">
+              <h1>
+                <span data-lang="en">NOTES</span>
+                <span data-lang="zh">说明</span>
+              </h1>
+
+              <p data-lang="en" style="text-indent:0;">
+                This tool loads DOCX from the repository and converts it to HTML in the browser. Legacy .doc is not supported in a reliable way on pure static hosting.
+              </p>
+              <p data-lang="zh" style="text-indent:0;">
+                本工具从仓库加载 DOCX 并在浏览器中转为 HTML。老式 .doc 在纯静态托管下无法可靠解析，建议统一转为 .docx。
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<script src="app.js"></script>
+</body>
+</html>
