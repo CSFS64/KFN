@@ -86,50 +86,56 @@
         <div class="scrollPane" id="scrollPane">
           <div class="doc" role="document" id="doc">
 
-            <section id="viewHome">
+            <div id="viewHome">
               <div class="homeHero">
                 <div class="homeTitle" data-lang="en">Kalyna Field Notes</div>
                 <div class="homeTitle" data-lang="zh">Kalyna 前线笔记</div>
             
-                <div class="homeLead" data-lang="en">
-                  A lightweight reading desk for field notes, briefs, and references.
-                  Open an entry below to read with search, zoom, and print.
-                </div>
-                <div class="homeLead" data-lang="zh">
-                  一个轻量的阅读桌面，用于整理前线笔记、简报与参考资料。
-                  选择下方条目即可进入全文阅读，并支持搜索、缩放与打印。
-                </div>
+                <p class="homeLead" data-lang="en">
+                  Kalyna Field Notes is a lightweight reading desk for analytical field notes,
+                  operational briefs, and reference documents related to contemporary conflict
+                  environments. The archive is designed for clear reading, search, and citation
+                  of structured research materials.
+                </p>
+                <p class="homeLead" data-lang="zh">
+                  Kalyna 前线笔记是一个用于整理与阅读分析性前线笔记、行动简报及参考资料的轻量归档平台，
+                  面向当代冲突环境研究与信息整理。本站提供结构化文档的阅读、检索与引用支持。
+                </p>
             
-                <div class="homeActions">
-                  <a class="btn" href="#/articles" data-lang="en">Browse Articles</a>
-                  <a class="btn" href="#/articles" data-lang="zh">浏览文章</a>
-            
-                  <a class="btn" href="#/about" data-lang="en">About</a>
-                  <a class="btn" href="#/about" data-lang="zh">关于</a>
-                </div>
-            
-                <div class="homeTips">
-                  <div class="homeTip" data-lang="en">
-                    <b>Tip:</b> The search box highlights matches in the current view (home / article / about).
-                  </div>
-                  <div class="homeTip" data-lang="zh">
-                    <b>提示：</b>左侧搜索框会在当前页面（主页/文章/关于）高亮匹配内容。
-                  </div>
+                <div class="homeInfo">
+                  <p data-lang="en">
+                    Documents are presented in their original academic layout converted from DOCX.
+                    Use the search panel to locate terms within the current view, and the zoom tools
+                    to adjust reading scale. All entries open in a unified reading interface.
+                  </p>
+                  <p data-lang="zh">
+                    文档以 DOCX 学术排版原貌转换呈现。可使用左侧搜索定位当前页面内容，
+                    并通过缩放工具调整阅读比例。所有条目均在统一阅读界面中打开。
+                  </p>
                 </div>
               </div>
             
-              <h2 class="homeSection" data-lang="en">Latest Entries</h2>
-              <h2 class="homeSection" data-lang="zh">最新条目</h2>
+              <h2 id="articlesTitle" data-lang="en">Archive Entries</h2>
+              <h2 id="articlesTitleZH" data-lang="zh">档案条目</h2>
             
-              <ul id="articleList" class="homeList"></ul>
+              <ol class="articleList" id="articleList"></ol>
             
-              <div class="homeFoot small" data-lang="en">
-                This is a static archive viewer. Content is for research and educational use.
+              <hr>
+            
+              <div class="homeLegal">
+                <p data-lang="en">
+                  © Kalyna Field Notes. All rights reserved.<br>
+                  This archive is intended for research, educational, and analytical use.
+                  Content does not constitute operational guidance or official reporting.
+                </p>
+            
+                <p data-lang="zh">
+                  © Kalyna 前线笔记 保留所有权利。<br>
+                  本档案仅用于研究、教育与分析目的，
+                  不构成行动指导或官方信息发布。
+                </p>
               </div>
-              <div class="homeFoot small" data-lang="zh">
-                KFN 是一个静态归档阅读器。内容用于研究与教育用途。
-              </div>
-            </section>
+            </div>
 
             <div id="viewArticle" style="display:none;">
               <div id="top"></div>
