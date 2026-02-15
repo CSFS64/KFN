@@ -213,11 +213,6 @@ li{ margin:6px 0; }
 .doc h3,.doc .kfn-h3{ font-size:12pt; margin-top:1.0em; }
 .doc h4,.doc .kfn-h4{ font-size:12pt; margin-top:1.0em; }
 
-/* 标题后的第一段：不缩进（更像论文排版） */
-.doc h2 + p, .doc h3 + p, .doc h4 + p{
-  text-indent:0;
-}
-
 /* 引用块 */
 .doc blockquote.kfn-quote{
   margin:0.8em 0;
