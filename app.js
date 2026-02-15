@@ -358,6 +358,7 @@
 
     for(const el of nodes){
       if(isHeadingEl(el) && isRefsTitleText(el.textContent)){
+        el.classList.add('refs-title');
         inRefs = true;
         continue;
       }
