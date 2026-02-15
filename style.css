@@ -142,6 +142,11 @@ li{ margin:6px 0; }
 .doc li{ margin:0 0 0.2em 0; }
 .doc hr{ border:0; border-top:1px solid #000; margin:1em 0; }
 
+#articleList li.active > a{
+  font-weight:700;
+  text-decoration: underline;
+}
+
 mark.hl{ background:#ffe58a; padding:0 1px; }
 mark.hl.active{ outline: 2px solid #ff9900; }
 
