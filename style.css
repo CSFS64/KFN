@@ -21,6 +21,7 @@ body{
 a{ color:var(--link); text-decoration:underline; }
 a:visited{ color:var(--visited); }
 
+/* ===== Top bar (web2.0 silver) ===== */
 .top{
   padding:10px 12px;
   background: linear-gradient(#f2f2f2, #dcdcdc);
@@ -35,7 +36,12 @@ a:visited{ color:var(--visited); }
 }
 .hint{ margin-top:4px; color:var(--muted); font-size:13px; }
 
-.page{ max-width:1200px; margin:12px auto; padding:0 10px; }
+.page{
+  max-width:1200px;
+  margin:12px auto;
+  padding:0 10px;
+}
+
 .wrap{ display:table; width:100%; border-collapse:collapse; }
 
 .left{
@@ -54,7 +60,11 @@ a:visited{ color:var(--visited); }
     0 2px 10px rgba(0,0,0,0.08);
 }
 
-.right{ display:table-cell; vertical-align:top; padding:10px 0 10px 10px; }
+.right{
+  display:table-cell;
+  vertical-align:top;
+  padding:10px 0 10px 10px;
+}
 
 .boxTitle{ font-size:13px; font-weight:bold; margin:0 0 8px; padding:2px 0; }
 .small{ font-size:13px; color:var(--muted); }
@@ -63,26 +73,40 @@ hr{ border:0; border-top:1px solid var(--line); margin:12px 0; }
 ul{ margin:6px 0 0 18px; padding:0; }
 li{ margin:6px 0; }
 
+/* ===== Web2.0 silver buttons ===== */
 .btn{
   display:inline-block;
   font-size:13px;
   padding:5px 10px;
   color:#111;
+  text-decoration:none;
   border:1px solid #7f7f7f;
   border-radius:12px;
   background: linear-gradient(#ffffff, #d2d2d2);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.95), 0 1px 0 rgba(0,0,0,0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    0 1px 0 rgba(0,0,0,0.08);
   text-shadow: 0 1px 0 rgba(255,255,255,0.7);
   cursor:pointer;
   user-select:none;
 }
-.btn:hover{ background: linear-gradient(#ffffff, #c9c9c9); border-color:#6f6f6f; }
-.btn:active{ background: linear-gradient(#c9c9c9, #f2f2f2); box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
+.btn:hover{
+  background: linear-gradient(#ffffff, #c9c9c9);
+  border-color:#6f6f6f;
+}
+.btn:active{
+  background: linear-gradient(#c9c9c9, #f2f2f2);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+}
 
 .btnRow{ display:flex; flex-wrap:wrap; gap:8px; }
 .toolbar{ display:flex; flex-direction:column; gap:10px; }
 
-.searchRow{ display:flex; gap:6px; align-items:center; }
+.searchRow{
+  display:flex;
+  gap:6px;
+  align-items:center;
+}
 .searchRow input{
   flex:1 1 auto;
   font-size:13px;
@@ -93,21 +117,48 @@ li{ margin:6px 0; }
   outline:none;
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.08);
 }
-.searchRow input:focus{ border-color:#666; }
+.searchRow input:focus{
+  border-color:#666;
+}
 
-.searchMeta{ font-size:12px; color:#555; line-height:1.3; }
+.searchMeta{
+  font-size:12px;
+  color:#555;
+  line-height:1.3;
+}
 
+/* ===== lang show/hide ===== */
 .lang-zh [data-lang="en"]{ display:none; }
 .lang-en [data-lang="zh"]{ display:none; }
 
+/* ===== Right: paper centered; scrollbar inside paper area ===== */
 .scrollPane{
   height: calc(100vh - 84px);
   overflow:auto;
   background:transparent;
+
   display:flex;
   justify-content:center;
   align-items:flex-start;
+
   padding:0 10px;
+}
+
+/* make scrollbar look like a simple gray bar (chromium/webkit) */
+.scrollPane::-webkit-scrollbar{ width:12px; }
+.scrollPane::-webkit-scrollbar-track{ background:transparent; }
+.scrollPane::-webkit-scrollbar-thumb{
+  background:#bdbdbd;
+  border-radius:10px;
+  border:3px solid transparent;
+  background-clip: content-box;
+}
+.scrollPane::-webkit-scrollbar-thumb:hover{ background:#a9a9a9; border:3px solid transparent; background-clip: content-box; }
+
+.docWrap{
+  /* this element keeps the paper centered while allowing internal transform scaling */
+  padding:0; /* keep clean */
+  margin:0 auto;
 }
 
 .doc{
@@ -118,8 +169,10 @@ li{ margin:6px 0; }
   padding:1in;
   border:1px solid #d6d6d6;
   border-radius:6px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.06);
-  transform-origin: top center;
+
+  box-shadow:
+    0 2px 16px rgba(0,0,0,0.10),
+    0 0 0 1px rgba(0,0,0,0.06);
 
   font-family:
     "Times New Roman",
@@ -131,99 +184,151 @@ li{ margin:6px 0; }
   font-size:12pt;
   line-height:2;
   color:#000;
+
+  /* zoom applied by JS via transform */
+  transform-origin: top center;
 }
 
-.doc p{ margin:0 0 0.5em 0; text-indent:0.5in; }
-.doc h1,.doc h2,.doc h3{ text-indent:0; margin:0 0 0.6em 0; font-weight:bold; line-height:1.3; }
-.doc h1{ font-size:18pt; text-align:center; margin-bottom:0.4em; }
+.doc p{
+  margin:0 0 0.5em 0;
+  text-indent:0.5in;
+}
+
+.doc h1,.doc h2,.doc h3{
+  text-indent:0;
+  margin:0 0 0.6em 0;
+  font-weight:bold;
+  line-height:1.3;
+}
+.doc h1{ font-size:14pt; text-align:center; }
 .doc h2{ font-size:12pt; margin-top:1.2em; }
 .doc h3{ font-size:12pt; margin-top:1.0em; }
+
 .doc ul,.doc ol{ margin:0 0 0.8em 1.2em; padding:0; }
 .doc li{ margin:0 0 0.2em 0; }
+
 .doc hr{ border:0; border-top:1px solid #000; margin:1em 0; }
 
-#articleList li.active > a{
-  font-weight:700;
-  text-decoration: underline;
+.doc .refs p{
+  text-indent:-0.5in;
+  padding-left:0.5in;
+  margin:0 0 0.5em 0;
 }
 
-mark.hl{ background:#ffe58a; padding:0 1px; }
-mark.hl.active{ outline: 2px solid #ff9900; }
+.doc [id]{ scroll-margin-top:12px; }
 
-.viewRow{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+mark.hl{
+  background:#ffe58a;
+  padding:0 1px;
+}
+mark.hl.active{
+  outline: 2px solid #ff9900;
+}
+
+/* ===== View row: radios + zoom + pdf ===== */
+.viewRow{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+}
 
 .langToggle{
-  display:flex; gap:10px; align-items:center;
+  display:flex;
+  gap:10px;
+  align-items:center;
   padding:6px 8px;
   border:1px solid var(--line);
   border-radius:14px;
   background: linear-gradient(#fbfbfb, #dedede);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
 }
+
 .langToggle label{
-  display:flex; align-items:center; gap:6px;
-  font-size:13px; color:#111; cursor:pointer; user-select:none;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:13px;
+  color:#111;
+  user-select:none;
+  cursor:pointer;
 }
+
 .langToggle input[type="radio"]{
-  appearance:none; -webkit-appearance:none;
-  width:14px; height:14px; border-radius:50%;
+  appearance:none;
+  -webkit-appearance:none;
+  width:14px;
+  height:14px;
+  border-radius:50%;
   border:1px solid #777;
   background: linear-gradient(#ffffff, #d8d8d8);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
   position:relative;
 }
+
 .langToggle input[type="radio"]:checked::after{
   content:"";
-  position:absolute; left:3px; top:3px;
-  width:6px; height:6px; border-radius:50%;
+  position:absolute;
+  left:3px;
+  top:3px;
+  width:6px;
+  height:6px;
+  border-radius:50%;
   background:#2b2b2b;
   box-shadow: 0 1px 0 rgba(255,255,255,0.35);
 }
 
-.zoomGroup{ display:flex; gap:8px; align-items:center; }
-.zoomLabel{ font-size:12px; color:#555; min-width:46px; text-align:center; }
-
-.homeHero{ text-indent:0; margin:0 0 0.8em 0; }
-.homeHero .big{
-  font-size:22pt;
-  font-weight:bold;
-  line-height:1.2;
+.zoomGroup{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.zoomLabel{
+  font-size:12px;
+  color:#555;
+  min-width:46px;
   text-align:center;
-  margin:0 0 0.4em 0;
-}
-.homeHero .sub{
-  text-indent:0;
-  margin:0 auto 0.6em auto;
-  max-width:44em;
-  color:#222;
 }
 
-.articleList{ text-indent:0; margin:0.2em 0 0 0; padding-left:1.2em; }
-.articleList li{ margin:0.4em 0; }
-
-.notice{
-  text-indent:0;
-  border:1px solid #ddd;
-  border-radius:10px;
-  padding:10px 12px;
-  background:#fafafa;
-  color:#333;
-}
-
+/* ===== Print ===== */
 @media print{
   body{ background:#fff; }
   .top,.left{ display:none !important; }
   .page{ margin:0; padding:0; max-width:none; }
   .wrap{ display:block; }
   .right{ display:block; padding:0; }
-  .scrollPane{ display:block !important; height:auto !important; overflow:visible !important; padding:0 !important; }
-  .doc{ border:0; width:auto; max-width:none; padding:0.75in; box-shadow:none; transform:none !important; }
+  .scrollPane{
+    display:block !important;
+    height:auto !important;
+    overflow:visible !important;
+    padding:0 !important;
+  }
+  .doc{
+    border:0;
+    width:auto;
+    max-width:none;
+    padding:0.75in;
+    box-shadow:none;
+    transform:none !important; /* print at natural size */
+  }
 }
 
+/* ===== Responsive ===== */
 @media (max-width:900px){
   .wrap{ display:block; }
   .left,.right{ display:block; width:auto; padding:0; }
   .left{ margin-bottom:10px; }
-  .scrollPane{ height:auto; overflow:visible; padding:12px 0; display:block; }
-  .doc{ width:100%; max-width:100%; padding:24px; border-left:0; border-right:0; }
+  .scrollPane{
+    height:auto;
+    overflow:visible;
+    padding:12px 0;
+    display:block;
+  }
+  .doc{
+    width:100%;
+    max-width:100%;
+    padding:24px;
+    border-left:0;
+    border-right:0;
+  }
 }
