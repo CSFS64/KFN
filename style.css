@@ -153,11 +153,15 @@ li{ margin:6px 0; }
   border:3px solid transparent;
   background-clip: content-box;
 }
-.scrollPane::-webkit-scrollbar-thumb:hover{ background:#a9a9a9; border:3px solid transparent; background-clip: content-box; }
+.scrollPane::-webkit-scrollbar-thumb:hover{
+  background:#a9a9a9;
+  border:3px solid transparent;
+  background-clip: content-box;
+}
 
 .docWrap{
   /* this element keeps the paper centered while allowing internal transform scaling */
-  padding:0; /* keep clean */
+  padding:0;
   margin:0 auto;
 }
 
@@ -182,41 +186,75 @@ li{ margin:6px 0; }
     serif;
 
   font-size:12pt;
-  line-height:2;
+  line-height:2;        /* ✅ 全文双倍行距（唯一来源） */
   color:#000;
 
   /* zoom applied by JS via transform */
   transform-origin: top center;
 }
 
+/* ===== Document typography (merged, no redundant overrides) ===== */
 .doc p{
-  margin:0 0 0.5em 0;
-  text-indent:0.5in;
+  margin:0 0 0.8em 0;
+  text-indent:0.5in;    /* ✅ 正文首行缩进 */
 }
 
-.doc h1,.doc h2,.doc h3{
-  text-indent:0;
-  margin:0 0 0.6em 0;
+/* 标题：不缩进 + 统一间距 */
+.doc h1,.doc h2,.doc h3,.doc h4,
+.doc .kfn-title,.doc .kfn-h2,.doc .kfn-h3,.doc .kfn-h4{
+  text-indent:0 !important;
   font-weight:bold;
   line-height:1.3;
+  margin:1.1em 0 0.6em 0;
 }
-.doc h1{ font-size:14pt; text-align:center; }
-.doc h2{ font-size:12pt; margin-top:1.2em; }
-.doc h3{ font-size:12pt; margin-top:1.0em; }
 
+.doc h1,.doc .kfn-title{ font-size:14pt; text-align:center; margin-top:0; }
+.doc h2,.doc .kfn-h2{ font-size:12pt; }
+.doc h3,.doc .kfn-h3{ font-size:12pt; margin-top:1.0em; }
+.doc h4,.doc .kfn-h4{ font-size:12pt; margin-top:1.0em; }
+
+/* 标题后的第一段：不缩进（更像论文排版） */
+.doc h2 + p, .doc h3 + p, .doc h4 + p{
+  text-indent:0;
+}
+
+/* 引用块 */
+.doc blockquote.kfn-quote{
+  margin:0.8em 0;
+  padding-left:1em;
+  border-left:3px solid #bbb;
+  text-indent:0;
+}
+
+/* 列表 */
 .doc ul,.doc ol{ margin:0 0 0.8em 1.2em; padding:0; }
 .doc li{ margin:0 0 0.2em 0; }
 
 .doc hr{ border:0; border-top:1px solid #000; margin:1em 0; }
 
-.doc .refs p{
-  text-indent:-0.5in;
-  padding-left:0.5in;
-  margin:0 0 0.5em 0;
-}
-
 .doc [id]{ scroll-margin-top:12px; }
 
+/* ===== APA References ===== */
+.doc .apa-ref{
+  text-indent:-0.5in !important;
+  padding-left:0.5in;
+  margin:0 0 0.6em 0;
+}
+.doc .apa-ref a{ word-break: break-word; }
+
+/* References/参考文献 标题：居中 + 与上文拉开距离（依赖 JS 加 refs-title） */
+.doc .refs-title{
+  text-align:center;
+  margin-top:1.8em !important;
+  margin-bottom:1.0em !important;
+  text-indent:0 !important;
+}
+/* 防止“标题后第一段不缩进”影响 APA 悬挂缩进 */
+.doc .refs-title + p.apa-ref{
+  text-indent:-0.5in !important;
+}
+
+/* ===== Search highlight ===== */
 mark.hl{
   background:#ffe58a;
   padding:0 1px;
@@ -290,46 +328,10 @@ mark.hl.active{
   text-align:center;
 }
 
-/* ===== 补丁 ===== */
-#doc [data-lang="en"] p,
-#doc [data-lang="zh"] p{
-  text-indent: 2em;
-  margin: 0 0 0.8em 0;
-  line-height: 1.65;
-}
-
-#doc h1, #doc h2, #doc h3, #doc h4,
-#doc .kfn-title, #doc .kfn-h2, #doc .kfn-h3, #doc .kfn-h4{
-  text-indent: 0 !important;
-  margin: 1.1em 0 0.6em 0;
-  line-height: 1.25;
-}
-
-#doc h2 + p, #doc h3 + p, #doc h4 + p{
-  text-indent: 0;
-}
-
-#doc blockquote.kfn-quote{
-  margin: 0.8em 0;
-  padding-left: 1em;
-  border-left: 3px solid #bbb;
-  text-indent: 0;
-}
-
-#doc .apa-ref{
-  text-indent: -2em !important;
-  padding-left: 2em;
-  margin: 0 0 0.6em 0;
-  line-height: 1.6;
-}
-
-#doc .apa-ref a{
-  word-break: break-word;
-}
-
+/* ===== TOC active ===== */
 #articleList li.active > a{
-  font-weight: 700;
-  text-decoration: underline;
+  font-weight:700;
+  text-decoration:underline;
 }
 
 /* ===== Print ===== */
